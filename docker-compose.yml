@@ -1,0 +1,22 @@
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: solarflow
+      MYSQL_USER: solarflow
+      MYSQL_PASSWORD: solarflow
+      MYSQL_ROOT_PASSWORD: root
+    ports: ["3306:3306"]
+    volumes: [mysql_data:/var/lib/mysql]
+  backend:
+    build: ./backend
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/solarflow
+      DB_USER: solarflow
+      DB_PASSWORD: solarflow
+      APP_ADMIN_EMAIL: ${APP_ADMIN_EMAIL:-}
+      APP_ADMIN_PASSWORD: ${APP_ADMIN_PASSWORD:-}
+    ports: ["8080:8080"]
+    depends_on: [mysql]
+volumes:
+  mysql_data:

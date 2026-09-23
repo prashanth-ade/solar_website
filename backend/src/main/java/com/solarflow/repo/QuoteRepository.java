@@ -1,0 +1,1 @@
+package com.solarflow.repo; import com.solarflow.model.*; import org.springframework.data.jpa.repository.JpaRepository; import java.util.*; public interface QuoteRepository extends JpaRepository<Quote,Long>{long countByStatus(String status); List<Quote> findByUserOrderByCreatedAtDesc(User user);}

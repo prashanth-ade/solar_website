@@ -1,0 +1,3 @@
+com\solarflow\controller\AdminControllerTest.class
+com\solarflow\controller\ServiceControllerTest.class
+com\solarflow\service\PaymentServiceTest.class

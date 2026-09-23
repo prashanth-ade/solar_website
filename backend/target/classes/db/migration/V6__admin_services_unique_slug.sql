@@ -1,0 +1,1 @@
+ALTER TABLE admin_services ADD CONSTRAINT uk_admin_services_slug UNIQUE (slug);

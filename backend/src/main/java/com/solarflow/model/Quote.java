@@ -1,0 +1,3 @@
+package com.solarflow.model;
+import jakarta.persistence.*; import lombok.*; import java.time.*;
+@Entity @Getter @Setter @NoArgsConstructor public class Quote { @Id @GeneratedValue(strategy=GenerationType.IDENTITY) public Long id; @ManyToOne public User user; public double monthlyKwh,roofArea,estimatedKw,estimatedCost,estimatedMonthlyGeneration,monthlySavings,paybackPeriodYears,twentyFiveYearSavings; public String pincode,propertyType,name,email,phone; public String city,message; public String status="DRAFT"; public LocalDateTime createdAt=LocalDateTime.now(); }
