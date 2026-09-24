@@ -98,10 +98,23 @@ export async function getService(id) {
   return api.get(`/admin/services/${id}`).then(response => normalizeService(response.data));
 }
 
-export async function saveService(service) {
+export async function uploadServiceImage(file) {
+  const form = new FormData();
+  form.append("file", file);
+  return api.post("/admin/services/upload-image", form, {
+    headers: { "Content-Type": false },
+  }).then(response => response.data);
+}
+
+export async function saveService(service, imageFile) {
+  let imageUrl = service.image || service.imageUrl || "";
+  if (imageFile) {
+    const uploaded = await uploadServiceImage(imageFile);
+    imageUrl = uploaded.imageUrl;
+  }
   const path = service.id ? `/admin/services/${service.id}` : "/admin/services";
   const method = service.id ? "put" : "post";
-  return api[method](path, servicePayload(service)).then(response => normalizeService(response.data));
+  return api[method](path, servicePayload({ ...service, image: imageUrl })).then(response => normalizeService(response.data));
 }
 
 export async function deleteService(id) {

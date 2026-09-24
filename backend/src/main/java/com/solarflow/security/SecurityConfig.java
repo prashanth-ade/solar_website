@@ -52,15 +52,16 @@ public class SecurityConfig {
                         .contentTypeOptions(Customizer.withDefaults())
                         .referrerPolicy(referrer -> referrer.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER_WHEN_DOWNGRADE)))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.GET, "/api/services/**", "/api/settings").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/quotes").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/calculator", "/api/calculator/**").permitAll()
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/products/**", "/api/categories/**", "/actuator/health", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
-                        .permitAll()
-                        .requestMatchers("/api/admin/**", "/api/quotes/admin/**").hasRole("ADMIN")
-                        .anyRequest().authenticated())
+                 .authorizeHttpRequests(auth -> auth
+                         .requestMatchers(HttpMethod.GET, "/api/services/**", "/api/settings").permitAll()
+                         .requestMatchers(HttpMethod.POST, "/api/quotes").permitAll()
+                         .requestMatchers(HttpMethod.POST, "/api/calculator", "/api/calculator/**").permitAll()
+                         .requestMatchers("/api/auth/**").permitAll()
+                         .requestMatchers(HttpMethod.GET, "/api/products/**", "/api/categories/**", "/actuator/health", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
+                         .permitAll()
+                         .requestMatchers("/uploads/**").permitAll()
+                         .requestMatchers("/api/admin/**", "/api/quotes/admin/**").hasRole("ADMIN")
+                         .anyRequest().authenticated())
                 .addFilterBefore(jwt, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }

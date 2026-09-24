@@ -3,15 +3,28 @@ package com.solarflow.controller;
 import com.solarflow.model.*;
 import com.solarflow.repo.*;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.beans.factory.annotation.Value;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/admin")
 public class AdminPersistenceController {
     private static final Set<String> SERVICE_STATUSES = Set.of("ACTIVE", "INACTIVE");
+    private static final Set<String> ALLOWED_IMAGE_TYPES = Set.of("image/jpeg", "image/png", "image/webp");
+    private static final long MAX_FILE_SIZE_BYTES = 5L * 1024 * 1024;
+
     private final SolarServiceRepository services;
     private final CalculatorRequestRecordRepository requests;
     private final CompanySettingsRepository settings;
+    
+    @Value("${app.upload.dir:uploads}")
+    private String uploadDir;
 
     public AdminPersistenceController(SolarServiceRepository services,
                                       CalculatorRequestRecordRepository requests,
@@ -56,6 +69,41 @@ public class AdminPersistenceController {
     public void deleteService(@PathVariable Long id) {
         if (!services.existsById(id)) throw new IllegalArgumentException("Service not found");
         services.deleteById(id);
+    }
+
+    @PostMapping("/services/upload-image")
+    public Map<String, String> uploadServiceImage(@RequestParam("file") MultipartFile file) {
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("File is empty");
+        }
+        String contentType = file.getContentType();
+        if (!ALLOWED_IMAGE_TYPES.contains(contentType)) {
+            throw new IllegalArgumentException("Invalid image type. Allowed: JPG, PNG, WEBP");
+        }
+        if (file.getSize() > MAX_FILE_SIZE_BYTES) {
+            throw new IllegalArgumentException("File too large. Maximum size is 5MB");
+        }
+        try {
+            String extension = getExtension(contentType);
+            String storedName = "service-" + System.currentTimeMillis() + "-" + UUID.randomUUID().toString().substring(0, 8) + extension;
+            Path serviceDir = Paths.get(uploadDir, "services");
+            Files.createDirectories(serviceDir);
+            Path target = serviceDir.resolve(storedName);
+            Files.copy(file.getInputStream(), target);
+            String imageUrl = "/uploads/services/" + storedName;
+            return Map.of("imageUrl", imageUrl, "originalName", file.getOriginalFilename());
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Failed to store image: " + e.getMessage());
+        }
+    }
+
+    private String getExtension(String contentType) {
+        return switch (contentType) {
+            case "image/jpeg" -> ".jpg";
+            case "image/png" -> ".png";
+            case "image/webp" -> ".webp";
+            default -> ".jpg";
+        };
     }
 
     @GetMapping("/calculator-requests")
